@@ -1,20 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
-#define NUM_TRIALS 200
-#define TARGET     10
+#define NUM_TRIALS 100
+#define TARGET     30.0
 
 FILE *fp;
-
-long plant(long input, long time)
-{
-    double x = (double)time;
-    double result = x + 0.1 * (float)input;
-    fprintf(fp, "%ld,%ld\n", time, (long)result);
-    return ((long)result);
+ 
+double sign(double x)
+{ 
+    if (x > 0.0) return 1.0;
+    if (x < 0.0) return -1.0;
+    return 0.0;
 }
 
-long PID(long output)
+double prev1 = 0;
+double plant(double x, double t)
+{
+    double result = prev1 + log(fabs(x)) * sign(x) + 1;
+    prev1 = result;
+
+    fprintf(fp, "%f,%f\n", t, result);
+    return result;
+}
+
+double PID(double output)
 {
     // YOUR CODE HERE
     
@@ -25,10 +35,10 @@ int main()
 {
     fp = fopen("out.csv", "w");
 
-    long output = 0;
+    double output = 0;
     for (long i = 0; i < NUM_TRIALS; i++)
     {
-        long input = PID(output);
+        double input = PID(output);
         output = plant(input, i);
     }
 
